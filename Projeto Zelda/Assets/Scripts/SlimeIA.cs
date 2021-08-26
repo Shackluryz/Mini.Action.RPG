@@ -6,8 +6,9 @@ public class SlimeIA : MonoBehaviour {
 
     private Animator anim;
     public int HP;
-
     private bool isDie;
+
+    public enemyState state;    
 
     // Start is called before the first frame update
     void Start()
@@ -49,5 +50,23 @@ public class SlimeIA : MonoBehaviour {
         
     }
 
+    void StateManager()
+    {
+        switch (state)
+        {
+            case enemyState.IDLE:
+                break;
+            case enemyState.ALERT;
+                break;
+            case enemyState.EXPLORE;
+                break;
+            case enemyState.FOLLOW;
+                break;
+            case enemyState.FURY;
+                break;
+            case enemyState.PATROL;
+                break;
+        }
+    }
     #endregion
 }
