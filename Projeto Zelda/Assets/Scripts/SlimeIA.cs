@@ -56,15 +56,26 @@ public class SlimeIA : MonoBehaviour {
         {
             case enemyState.IDLE:
                 break;
-            case enemyState.ALERT;
+            case enemyState.ALERT:
                 break;
-            case enemyState.EXPLORE;
+            case enemyState.EXPLORE:
                 break;
-            case enemyState.FOLLOW;
+            case enemyState.FOLLOW:
                 break;
-            case enemyState.FURY;
+            case enemyState.FURY:
                 break;
-            case enemyState.PATROL;
+            case enemyState.PATROL:
+                break;
+        }
+    }
+
+    void ChangeState(enemyState newState)
+    {
+        switch (state)
+        {
+            case enemyState.IDLE:
+                break;
+            case enemyState.ALERT:
                 break;
         }
     }
