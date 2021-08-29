@@ -14,9 +14,10 @@ public class SlimeIA : MonoBehaviour {
     public enemyState state;
 
     public const float idleWaitTime = 3f;
-    public const float patrolWaitTime = 5f;
 
     //IA
+    private bool isWalk;
+    private bool isAlert;
     private NavMeshAgent agent;
     private int idWayPoint;
     private Vector3 destination;
@@ -35,7 +36,14 @@ public class SlimeIA : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        
+        StateManager();
+        if (agent.desiredVelocity.magnitude >= 0.1f) {
+            isWalk = true;
+        } else {
+            isWalk = false;
+        }
+
+        anim.SetBool("isWalk", isWalk);
     }
 
     IEnumerator Died() {
@@ -54,7 +62,7 @@ public class SlimeIA : MonoBehaviour {
         HP -= amount;
 
         if (HP > 0) {
-
+            ChangeState(enemyState.FURY);
             anim.SetTrigger("GetHit");
 
         } else {
@@ -70,15 +78,11 @@ public class SlimeIA : MonoBehaviour {
     {
         switch (state)
         {
-            case enemyState.IDLE:
-                break;
-            case enemyState.ALERT:
-                break;
-            case enemyState.EXPLORE:
-                break;
             case enemyState.FOLLOW:
                 break;
             case enemyState.FURY:
+                destination = _GameManager.player.position;
+                agent.destination = destination;
                 break;
             case enemyState.PATROL:
                 break;
@@ -89,10 +93,11 @@ public class SlimeIA : MonoBehaviour {
     {
         StopAllCoroutines();
         state = newState;
-        print(newState);
+
         switch (state)
         {
             case enemyState.IDLE:
+                agent.stoppingDistance = 0;
                 destination = transform.position;
                 agent.destination = destination;
                 StartCoroutine("IDLE");
@@ -100,23 +105,29 @@ public class SlimeIA : MonoBehaviour {
             case enemyState.ALERT:
                 break;
             case enemyState.PATROL:
+                agent.stoppingDistance = 0;
                 idWayPoint = Random.Range(0, _GameManager.slimeWayPoints.Length);
                 destination = _GameManager.slimeWayPoints[idWayPoint].position;
                 agent.destination = destination;
                 StartCoroutine("PATROL");
+                break;
+            case enemyState.FURY:
+                destination = transform.position;
+                agent.stoppingDistance = _GameManager.slimeDistanceToAttack;
+                agent.destination = destination;
                 break;
         }
     }
 
     IEnumerator IDLE()
     {
-        yield return new WaitForSeconds(idleWaitTime);
+        yield return new WaitForSeconds(_GameManager.slimeIdleWaitTime);
         StayStill(50); // 50% de chance de ficar parado ou entrar em patrulha
     }
 
     IEnumerator PATROL()
     {
-        yield return new WaitForSeconds(patrolWaitTime);
+        yield return new WaitUntil(() => agent.remainingDistance <= 0);
         StayStill(30); //30% de chance de ficar parado e 70% de ficar em patrulha
     }
 
