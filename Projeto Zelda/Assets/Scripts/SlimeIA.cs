@@ -23,8 +23,7 @@ public class SlimeIA : MonoBehaviour {
     private Vector3 destination;
 
     // Start is called before the first frame update
-    void Start()
-    {
+    void Start() {
         _GameManager = FindObjectOfType(typeof(GameManager)) as GameManager;
 
         anim = GetComponent<Animator>();
@@ -34,8 +33,7 @@ public class SlimeIA : MonoBehaviour {
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    void Update() {
         StateManager();
         if (agent.desiredVelocity.magnitude >= 0.1f) {
             isWalk = true;
@@ -44,6 +42,7 @@ public class SlimeIA : MonoBehaviour {
         }
 
         anim.SetBool("isWalk", isWalk);
+        anim.SetBool("isAlert", isAlert);
     }
 
     IEnumerator Died() {
@@ -52,6 +51,16 @@ public class SlimeIA : MonoBehaviour {
         yield return new WaitForSeconds(2.5f);
         Destroy(this.gameObject);
     
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        if (other.gameObject.tag == "Player") {
+
+            if (state == enemyState.IDLE || state == enemyState.PATROL) {
+                ChangeState(enemyState.ALERT);
+            }
+                   
+        }
     }
 
     #region Meus Métodos
@@ -74,10 +83,8 @@ public class SlimeIA : MonoBehaviour {
         
     }
 
-    void StateManager()
-    {
-        switch (state)
-        {
+    void StateManager() {
+        switch (state) {
             case enemyState.FOLLOW:
                 break;
             case enemyState.FURY:
@@ -89,13 +96,11 @@ public class SlimeIA : MonoBehaviour {
         }
     }
 
-    void ChangeState(enemyState newState)
-    {
+    void ChangeState(enemyState newState) {
         StopAllCoroutines();
         state = newState;
 
-        switch (state)
-        {
+        switch (state) {
             case enemyState.IDLE:
                 agent.stoppingDistance = 0;
                 destination = transform.position;
@@ -103,6 +108,10 @@ public class SlimeIA : MonoBehaviour {
                 StartCoroutine("IDLE");
                 break;
             case enemyState.ALERT:
+                agent.stoppingDistance = 0;
+                destination = transform.position;
+                agent.destination = destination;
+                isAlert = true;
                 break;
             case enemyState.PATROL:
                 agent.stoppingDistance = 0;
@@ -119,32 +128,25 @@ public class SlimeIA : MonoBehaviour {
         }
     }
 
-    IEnumerator IDLE()
-    {
+    IEnumerator IDLE() {
         yield return new WaitForSeconds(_GameManager.slimeIdleWaitTime);
         StayStill(50); // 50% de chance de ficar parado ou entrar em patrulha
     }
 
-    IEnumerator PATROL()
-    {
+    IEnumerator PATROL() {
         yield return new WaitUntil(() => agent.remainingDistance <= 0);
         StayStill(30); //30% de chance de ficar parado e 70% de ficar em patrulha
     }
 
-    void StayStill(int yes)
-    {
-        if (Rand() < yes)
-        {
+    void StayStill(int yes) {
+        if (Rand() < yes) {
             ChangeState(enemyState.IDLE);
-        }
-        else // Caso No
-        {
+        } else {
             ChangeState(enemyState.PATROL);
         }
     }
 
-    int Rand()
-    {
+    int Rand() {
         int rand = Random.Range(0, 100);
         return rand;
     }
