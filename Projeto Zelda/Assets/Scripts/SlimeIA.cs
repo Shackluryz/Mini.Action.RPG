@@ -18,6 +18,7 @@ public class SlimeIA : MonoBehaviour {
     //IA
     private bool isWalk;
     private bool isAlert;
+    private bool isPlayerVisible;
     private NavMeshAgent agent;
     private int idWayPoint;
     private Vector3 destination;
@@ -29,7 +30,7 @@ public class SlimeIA : MonoBehaviour {
         anim = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
 
-        ChangeState(state);
+        //ChangeState(state);
     }
 
     // Update is called once per frame
@@ -56,11 +57,20 @@ public class SlimeIA : MonoBehaviour {
     private void OnTriggerEnter(Collider other) {
         if (other.gameObject.tag == "Player") {
 
+            isPlayerVisible = true;
+
             if (state == enemyState.IDLE || state == enemyState.PATROL) {
                 ChangeState(enemyState.ALERT);
             }
                    
         }
+    }
+
+    private void OnTriggerExit(Collider other) {
+        if (other.gameObject.tag == "Player") {
+            isPlayerVisible = false;
+        }
+    
     }
 
     #region Meus Métodos
@@ -99,6 +109,7 @@ public class SlimeIA : MonoBehaviour {
     void ChangeState(enemyState newState) {
         StopAllCoroutines();
         state = newState;
+        isAlert = false;
 
         switch (state) {
             case enemyState.IDLE:
@@ -112,6 +123,7 @@ public class SlimeIA : MonoBehaviour {
                 destination = transform.position;
                 agent.destination = destination;
                 isAlert = true;
+                StartCoroutine("ALERT");
                 break;
             case enemyState.PATROL:
                 agent.stoppingDistance = 0;
@@ -119,6 +131,9 @@ public class SlimeIA : MonoBehaviour {
                 destination = _GameManager.slimeWayPoints[idWayPoint].position;
                 agent.destination = destination;
                 StartCoroutine("PATROL");
+                break;
+            case enemyState.FOLLOW:
+                agent.stoppingDistance = _GameManager.slimeDistanceToAttack;
                 break;
             case enemyState.FURY:
                 destination = transform.position;
@@ -136,6 +151,16 @@ public class SlimeIA : MonoBehaviour {
     IEnumerator PATROL() {
         yield return new WaitUntil(() => agent.remainingDistance <= 0);
         StayStill(30); //30% de chance de ficar parado e 70% de ficar em patrulha
+    }
+
+    IEnumerator ALERT() {
+        yield return new WaitForSeconds(_GameManager.slimeAlertTime);
+
+        if (isPlayerVisible == true) {
+            ChangeState(enemyState.FOLLOW);
+        } else {
+            StayStill(10);
+        }
     }
 
     void StayStill(int yes) {
