@@ -16,9 +16,9 @@ TagManager:
   - 
   - hitLayer
   - Enemy
-  - 
-  - 
-  - 
+  - TakeDamage
+  - Player
+  - PostProcessing
   - 
   - 
   - 
