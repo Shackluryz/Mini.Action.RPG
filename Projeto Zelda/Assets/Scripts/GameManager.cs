@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     public float slimeDistanceToAttack = 2.3f;
     public float slimeAlertTime = 3f;
     public float slimeAttackDelay = 1f;
+    public float slimeLookAtSpeed = 2f;
 
     [Header("Rain Manager")]
     public PostProcessVolume postB;

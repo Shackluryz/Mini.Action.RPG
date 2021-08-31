@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     private Animator anim;
 
     [Header("Config Player")]
+    public int HP;
     public float movementSpeed = 3f;
     private Vector3 direction;
     private bool isWalk;
@@ -41,6 +42,12 @@ public class PlayerController : MonoBehaviour
         Inputs();
         MoveCharacter();
         UpdateAnimator();        
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        if (other.gameObject.tag == "TakeDamage") {
+            GetHit(1);        
+        }  
     }
 
     #region Meus Métodos
@@ -86,6 +93,15 @@ public class PlayerController : MonoBehaviour
 
     void AttackIsDone() {
         isAttack = false;
+    }
+
+    void GetHit(int amount) {
+        HP -= amount;
+        if (HP > 0) {
+            anim.SetTrigger("Hit");
+        } else {
+            anim.SetTrigger("Die");        
+        }
     }
     #endregion
 

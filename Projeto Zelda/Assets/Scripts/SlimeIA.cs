@@ -96,8 +96,12 @@ public class SlimeIA : MonoBehaviour {
 
     void StateManager() {
         switch (state) {
+            case enemyState.ALERT:
+                LookAt();
+                break;
             case enemyState.FOLLOW:
-                // Comportamento quando estiver seguindo
+            // Comportamento quando estiver seguindo
+                LookAt();
                 destination = _GameManager.player.position;
                 agent.destination = destination;
 
@@ -107,6 +111,7 @@ public class SlimeIA : MonoBehaviour {
                 break;
             case enemyState.FURY:
                 // Comportamento quando estiver em furia
+                LookAt();
                 destination = _GameManager.player.position;
                 agent.destination = destination;
 
@@ -206,14 +211,19 @@ public class SlimeIA : MonoBehaviour {
     }
 
     void Attack() {
-        if (!isAttack) {
+        if (!isAttack && isPlayerVisible) {
             isAttack = true;
             anim.SetTrigger("Attack");
         }
+        StartCoroutine("ATTACK");
     }
 
-    void AttackIsDone() {
-        StartCoroutine("ATTACK");
+    void LookAt() {
+
+            Vector3 lookDirection = (_GameManager.player.position - transform.position).normalized;
+            Quaternion lookRotation = Quaternion.LookRotation(lookDirection);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, _GameManager.slimeLookAtSpeed * Time.deltaTime);
+      
     }
 
     #endregion
